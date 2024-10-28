@@ -8,24 +8,24 @@ export class BotCore {
     public static async procesarMensaje(client: Client, message: Message){
         console.log('********************************************')
         if(isContactMessage(message.from)){
-            const telefono = extractPhoneNumber(message.from);
-            const mensaje = message.body;
+            const TELEFONO = extractPhoneNumber(message.from);
+            const MENSAJE = message.body;
 
-            console.log('telefono',telefono);
-            console.log('mensaje',mensaje);
+            console.log('telefono',TELEFONO);
+            console.log('mensaje',MENSAJE);
 
-            const responseConversacionCabecera = await conversacionCabeceraService.obtenerUltimaConversacionCabecera(telefono);
+            const responseConversacionCabecera = await conversacionCabeceraService.obtenerUltimaConversacionCabecera(TELEFONO);
             const conversacionCabecera = responseConversacionCabecera.data;
+
+            const ESTADO = conversacionCabecera.ultimoEstado;
 
             const responseConversacion = await conversacionService.insertarConversacion({
                 autor: 'U',
-                idEstado: 1,
-                idConversacionCabecera: conversacionCabecera.id_conversacion_cabecera,
-                mensaje: mensaje,
-                telefono: telefono
+                idEstado: ESTADO,
+                idConversacionCabecera: conversacionCabecera.idConversacionCabecera,
+                mensaje: MENSAJE,
+                telefono: TELEFONO
             });
-
-
 
         } else {
             console.log(`Ignorando mensaje recibido de ${message.from}`);
