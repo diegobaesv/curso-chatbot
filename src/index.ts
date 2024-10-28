@@ -4,7 +4,7 @@ import { BotCore } from "./core/bot-core";
 
 const client: Client = new Client({
     puppeteer: {
-        headless: true,
+        headless: false,
         args: ['--no-sandbox'],
         defaultViewport: null
     },
