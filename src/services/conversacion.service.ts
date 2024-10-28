@@ -4,6 +4,6 @@ import { BASE_URL_API } from "../shared/constant";
 
 const axios = createAxios(`${BASE_URL_API}/conversaciones`);
 
-export const insertarConversacion = (request: InsertarConversacionRequest)=> {
-    return axios.post('/',request);
+export const insertarConversacion = async (request: InsertarConversacionRequest)=> {
+    return (await axios.post('/',request)).data;
 }
