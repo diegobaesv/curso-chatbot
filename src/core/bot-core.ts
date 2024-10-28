@@ -30,16 +30,16 @@ export class BotCore {
                 switch (ESTADO) {
                     case ESTADO_1:
                         await this.enviarMensajeUsuario(
-                            `Hola, bienvenid@ al bot de Envios Devpool, estoy aquí para ayudarte. :)`
+                            `Hola 😁, bienvenid@ al bot de Envios Devpool 🚚, estoy aquí para ayudarte. 😉🤲`
                             ,client,ESTADO_2,ID_CONVERSACION_CABECERA,TELEFONO);
 
                         await this.enviarMensajeUsuario(
                             [
-                            'Elije una de estas opciones:',
-                            '1. Programar dirección de envío',
-                            '2. Ver pedidos en curso',
-                            '3. Ver pedidos entregados',
-                            '4. Ver preguntas frecuentes',
+                            'Elije una de estas opciones ⬇️:',
+                            '1. Programar dirección de envío 🗺️',
+                            '2. Ver pedidos en curso 🚚',
+                            '3. Ver pedidos entregados ✅',
+                            '4. Ver preguntas frecuentes ❔',
                             ].join('\n')
                             ,client,ESTADO_2,ID_CONVERSACION_CABECERA,TELEFONO);
                         break;
