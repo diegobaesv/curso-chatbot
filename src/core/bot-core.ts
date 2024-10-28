@@ -34,7 +34,13 @@ export class BotCore {
                             ,client,ESTADO_2,ID_CONVERSACION_CABECERA,TELEFONO);
 
                         await this.enviarMensajeUsuario(
-                            `Elije una de estas opciones:\n1. Programar dirección de envío\n2. Ver pedidos en curso\n3. Ver pedidos entregados\n4. Ver preguntas frecuentes`
+                            [
+                            'Elije una de estas opciones:',
+                            '1. Programar dirección de envío',
+                            '2. Ver pedidos en curso',
+                            '3. Ver pedidos entregados',
+                            '4. Ver preguntas frecuentes',
+                            ].join('\n')
                             ,client,ESTADO_2,ID_CONVERSACION_CABECERA,TELEFONO);
                         break;
                     case ESTADO_2:
@@ -48,22 +54,40 @@ export class BotCore {
                             switch(MENSAJE){
                                 case '1':
                                     await this.enviarMensajeUsuario(
-                                        `Estos son tus pedidos pendientes:\n1. Pedido #20654\n2. Pedido #20655`
+                                        [
+                                        'Estos son tus pedidos pendientes:',
+                                        '1. Pedido #20654',
+                                        '2. Pedido #20655',
+                                        ].join('\n')
                                         ,client,ESTADO_4,ID_CONVERSACION_CABECERA,TELEFONO);
                                     break;
                                 case '2':
                                     await this.enviarMensajeUsuario(
-                                        `Estos son tus pedidos en curso:\n1. Pedido #30654\n2. Pedido #40655`
+                                        [
+                                        'Estos son tus pedidos curso:',
+                                        '1. Pedido #3030',
+                                        '2. Pedido #4040',
+                                        ].join('\n')
                                         ,client,ESTADO_6,ID_CONVERSACION_CABECERA,TELEFONO);
                                     break;
                                 case '3':
                                     await this.enviarMensajeUsuario(
-                                        `Estos son tus pedidos entregados:\n1. Pedido #5555\n2. Pedido #6666`
+                                        [
+                                        'Estos son tus pedidos entregado:',
+                                        '1. Pedido #5050',
+                                        '2. Pedido #6060',
+                                        ].join('\n')
                                         ,client,ESTADO_7,ID_CONVERSACION_CABECERA,TELEFONO);
                                     break;
                                 case '4':
                                     await this.enviarMensajeUsuario(
-                                        `Elige una pregunta:\n1. Tiendas Cercanas:\n2. Horarios de servicio\n3.Telefono de asesores\n4.Metodos de pago`
+                                        [
+                                        'Elige una pregunta:',
+                                        '1. Tiendas Cercanas',
+                                        '2. Horarios de servicio',
+                                        '3. Telefono de asesores',
+                                        '4. Metodos de pago',
+                                        ].join('\n')
                                         ,client,ESTADO_3,ID_CONVERSACION_CABECERA,TELEFONO);
                                     break;
                             }
