@@ -2,10 +2,12 @@ import { Client, Message } from "whatsapp-web.js";
 import * as conversacionService from "../services/conversacion.service";
 import * as conversacionCabeceraService from "../services/conversacion-cabecera.service";
 import * as clienteService from "../services/cliente.service";
+import * as pedidoService from "../services/pedido.service";
 import { extractPhoneNumber, isContactMessage } from "../shared/util";
-import { ESTADO_1, ESTADO_2, ESTADO_3, ESTADO_4, ESTADO_5, ESTADO_6, ESTADO_7, ESTADO_9 } from "../shared/constant";
+import { ESTADO_1, ESTADO_2, ESTADO_3, ESTADO_4, ESTADO_5, ESTADO_6, ESTADO_7, ESTADO_9, ESTADO_PEDIDO_CURSO, ESTADO_PEDIDO_ENTREGADO, ESTADO_PEDIDO_PENDIENTE } from "../shared/constant";
 import { ConversacionCabecera } from "../models/conversacion-cabecera";
 import { Cliente } from "../models/cliente";
+import { Pedido } from "../models/pedido";
 
 export class BotCore {
 
@@ -25,6 +27,7 @@ export class BotCore {
 
                 const ESTADO = conversacionCabecera.ultimoEstado;
                 const ID_CONVERSACION_CABECERA = conversacionCabecera.idConversacionCabecera;
+                const ID_CLIENTE = conversacionCabecera.idCliente;
 
                 //GUARDAR SU MENSAJE ENTRANTE CON SU ULTIMO ESTADO ENCONTRADO
                 await this.guardarMensajeUsuario(MENSAJE, ESTADO, ID_CONVERSACION_CABECERA, TELEFONO);
@@ -38,7 +41,7 @@ export class BotCore {
                         await this.enviarMensajeUsuario(
                             [
                             'Elije una de estas opciones ⬇️:',
-                            '1. 🗺️ Programar dirección de envío',
+                            '1. 🗺️ Ver pedidos pendientes de entrega',
                             '2. 🚚 Ver pedidos en curso',
                             '3. ✅ Ver pedidos entregados',
                             '4. ❔ Ver preguntas frecuentes',
@@ -47,7 +50,7 @@ export class BotCore {
                         break;
                     case ESTADO_2:
                         if(['1','2','3','4'].includes(MENSAJE)){
-                            if(['1','2','3'].includes(MENSAJE) && !conversacionCabecera.idCliente){
+                            if(['1','2','3'].includes(MENSAJE) && !ID_CLIENTE){
                                 await this.enviarMensajeUsuario(
                                     `Para estas ver opciones, por tu segurtidad debes ingresar tu Documento de Identidad 🪪`
                                     ,client,ESTADO_9,ID_CONVERSACION_CABECERA,TELEFONO);
@@ -55,29 +58,38 @@ export class BotCore {
                             }
                             switch(MENSAJE){
                                 case '1':
+                                    const pedidosPendientes: Pedido[] = (await pedidoService.listarPedidosFiltro(ID_CLIENTE, ESTADO_PEDIDO_PENDIENTE)).data;
+                                    const mensajePedidosPendientes: string[] = pedidosPendientes.map((ped,i)=>{
+                                        return `${(i+1)}. Pedido #${ped.codPedido}`
+                                    });
                                     await this.enviarMensajeUsuario(
                                         [
-                                        'Estos son tus pedidos pendientes:',
-                                        '1. Pedido #20654',
-                                        '2. Pedido #20655',
+                                        'Estos son tus pedidos pendientes ⬇️:',
+                                        ...mensajePedidosPendientes
                                         ].join('\n')
                                         ,client,ESTADO_4,ID_CONVERSACION_CABECERA,TELEFONO);
                                     break;
                                 case '2':
+                                    const pedidosCurso: Pedido[] = (await pedidoService.listarPedidosFiltro(ID_CLIENTE, ESTADO_PEDIDO_CURSO)).data;
+                                    const mensajePedidosCurso: string[] = pedidosCurso.map((ped,i)=>{
+                                        return `${(i+1)}. Pedido #${ped.codPedido}`
+                                    });
                                     await this.enviarMensajeUsuario(
                                         [
-                                        'Estos son tus pedidos curso:',
-                                        '1. Pedido #3030',
-                                        '2. Pedido #4040',
+                                        'Estos son tus pedidos curso ⬇️:',
+                                        ...mensajePedidosCurso,
                                         ].join('\n')
                                         ,client,ESTADO_6,ID_CONVERSACION_CABECERA,TELEFONO);
                                     break;
                                 case '3':
+                                    const pedidosEntregados: Pedido[] = (await pedidoService.listarPedidosFiltro(ID_CLIENTE, ESTADO_PEDIDO_ENTREGADO)).data;
+                                    const mensajePedidosEntregados: string[] = pedidosEntregados.map((ped,i)=>{
+                                        return `${(i+1)}. Pedido #${ped.codPedido}`
+                                    });
                                     await this.enviarMensajeUsuario(
                                         [
-                                        'Estos son tus pedidos entregado:',
-                                        '1. Pedido #5050',
-                                        '2. Pedido #6060',
+                                        'Estos son tus pedidos entregado ⬇️:',
+                                        ...mensajePedidosEntregados,
                                         ].join('\n')
                                         ,client,ESTADO_7,ID_CONVERSACION_CABECERA,TELEFONO);
                                     break;

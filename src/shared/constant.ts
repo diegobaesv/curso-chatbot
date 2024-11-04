@@ -10,3 +10,8 @@ export const ESTADO_6 = 6;
 export const ESTADO_7 = 7;
 export const ESTADO_8 = 8;
 export const ESTADO_9 = 9;
+
+export const ESTADO_PEDIDO_PENDIENTE = 'P';
+export const ESTADO_PEDIDO_CURSO = 'C';
+export const ESTADO_PEDIDO_ENTREGADO = 'E';
+export const ESTADO_PEDIDO_CANCELADO = 'X';
