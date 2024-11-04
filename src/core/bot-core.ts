@@ -36,10 +36,10 @@ export class BotCore {
                         await this.enviarMensajeUsuario(
                             [
                             'Elije una de estas opciones ⬇️:',
-                            '1. Programar dirección de envío 🗺️',
-                            '2. Ver pedidos en curso 🚚',
-                            '3. Ver pedidos entregados ✅',
-                            '4. Ver preguntas frecuentes ❔',
+                            '1. 🗺️ Programar dirección de envío',
+                            '2. 🚚 Ver pedidos en curso',
+                            '3. ✅ Ver pedidos entregados',
+                            '4. ❔ Ver preguntas frecuentes',
                             ].join('\n')
                             ,client,ESTADO_2,ID_CONVERSACION_CABECERA,TELEFONO);
                         break;
@@ -47,7 +47,7 @@ export class BotCore {
                         if(['1','2','3','4'].includes(MENSAJE)){
                             if(['1','2','3'].includes(MENSAJE) && !conversacionCabecera.idCliente){
                                 await this.enviarMensajeUsuario(
-                                    `Debes ingresar tu Documento de Identidad`
+                                    `Para estas ver opciones, por tu segurtidad debes ingresar tu Documento de Identidad 🪪`
                                     ,client,ESTADO_9,ID_CONVERSACION_CABECERA,TELEFONO);
                                 return;
                             }
@@ -94,10 +94,20 @@ export class BotCore {
                         } else{
                             await this.enviarMensajeUsuario(
                                 `Debes enviar una opción correcta.`
-                                ,client,ESTADO_2,ID_CONVERSACION_CABECERA,TELEFONO);
+                                ,client,ESTADO,ID_CONVERSACION_CABECERA,TELEFONO);
                         }
                         break;
-
+                    case ESTADO_9: 
+                        if(MENSAJE == '72686764'){
+                            await this.enviarMensajeUsuario(
+                                `Bienvenido DIEGO BAES 😁, ya hemos vinculado este numero a tu documento. Puedes volver a iniciar la conversación`
+                                ,client,ESTADO_1,ID_CONVERSACION_CABECERA,TELEFONO);
+                        } else {
+                            await this.enviarMensajeUsuario(
+                                `Debes enviar una opción correcta.`
+                                ,client,ESTADO,ID_CONVERSACION_CABECERA,TELEFONO);
+                        }
+                        break;
                     default:
                         await this.enviarMensajeUsuario(
                             `Ahora estas en el estado: ${ESTADO}`
