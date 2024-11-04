@@ -1,9 +1,11 @@
 import { Client, Message } from "whatsapp-web.js";
 import * as conversacionService from "../services/conversacion.service";
 import * as conversacionCabeceraService from "../services/conversacion-cabecera.service";
+import * as clienteService from "../services/cliente.service";
 import { extractPhoneNumber, isContactMessage } from "../shared/util";
-import { ESTADO_1, ESTADO_2, ESTADO_3, ESTADO_4, ESTADO_6, ESTADO_7, ESTADO_9 } from "../shared/constant";
+import { ESTADO_1, ESTADO_2, ESTADO_3, ESTADO_4, ESTADO_5, ESTADO_6, ESTADO_7, ESTADO_9 } from "../shared/constant";
 import { ConversacionCabecera } from "../models/conversacion-cabecera";
+import { Cliente } from "../models/cliente";
 
 export class BotCore {
 
@@ -97,14 +99,15 @@ export class BotCore {
                                 ,client,ESTADO,ID_CONVERSACION_CABECERA,TELEFONO);
                         }
                         break;
-                    case ESTADO_9: 
-                        if(MENSAJE == '72686764'){
+                    case ESTADO_9:
+                        const cliente: Cliente = (await clienteService.obtenerClientePorNumeroDocumento(MENSAJE)).data;
+                        if(cliente){
                             await this.enviarMensajeUsuario(
-                                `Bienvenido DIEGO BAES 😁, ya hemos vinculado este numero a tu documento. Puedes volver a iniciar la conversación`
+                                `Bienvenido ${cliente.nombres.toUpperCase()} ${cliente.apellidoPaterno.toUpperCase()} 😁, ya hemos vinculado este numero a tu documento. Puedes volver a iniciar la conversación. 🤲`
                                 ,client,ESTADO_1,ID_CONVERSACION_CABECERA,TELEFONO);
                         } else {
                             await this.enviarMensajeUsuario(
-                                `Debes enviar una opción correcta.`
+                                `⚠️ Debes enviar un documento existente.`
                                 ,client,ESTADO,ID_CONVERSACION_CABECERA,TELEFONO);
                         }
                         break;
