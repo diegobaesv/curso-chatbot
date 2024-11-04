@@ -102,6 +102,7 @@ export class BotCore {
                     case ESTADO_9:
                         const cliente: Cliente = (await clienteService.obtenerClientePorNumeroDocumento(MENSAJE)).data;
                         if(cliente){
+                            await clienteService.actualizarTelefonoCliente(cliente.idCliente, TELEFONO);
                             await this.enviarMensajeUsuario(
                                 `Bienvenido ${cliente.nombres.toUpperCase()} ${cliente.apellidoPaterno.toUpperCase()} 😁, ya hemos vinculado este numero a tu documento. Puedes volver a iniciar la conversación. 🤲`
                                 ,client,ESTADO_1,ID_CONVERSACION_CABECERA,TELEFONO);
