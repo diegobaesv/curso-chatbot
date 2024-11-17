@@ -1,4 +1,4 @@
-import { Client, Message } from "whatsapp-web.js";
+import { Client, Message, MessageTypes } from "whatsapp-web.js";
 import * as conversacionService from "../services/conversacion.service";
 import * as conversacionCabeceraService from "../services/conversacion-cabecera.service";
 import * as clienteService from "../services/cliente.service";
@@ -13,7 +13,7 @@ export class BotCore {
 
     public static async procesarMensaje(client: Client, message: Message){
         console.log('********************************************');
-        if(isContactMessage(message.from)){
+        if(isContactMessage(message.from) && (message.type === MessageTypes.TEXT || message.type === MessageTypes.LOCATION)) {
             try {
                 const TELEFONO = extractPhoneNumber(message.from);
                 const MENSAJE = message.body;
@@ -30,8 +30,10 @@ export class BotCore {
                 const ID_CLIENTE = conversacionCabecera.idCliente;
 
                 //GUARDAR SU MENSAJE ENTRANTE CON SU ULTIMO ESTADO ENCONTRADO
-                await this.guardarMensajeUsuario(MENSAJE, ESTADO, ID_CONVERSACION_CABECERA, TELEFONO);
-
+                if(message.type == MessageTypes.TEXT ) {
+                    await this.guardarMensajeUsuario(MENSAJE, ESTADO, ID_CONVERSACION_CABECERA, TELEFONO);
+                }
+                
                 switch (ESTADO) {
                     case ESTADO_1:
                         await this.enviarMensajeUsuario(
@@ -60,7 +62,7 @@ export class BotCore {
                                 case '1':
                                     const pedidosPendientes: Pedido[] = (await pedidoService.listarPedidosFiltro(ID_CLIENTE, ESTADO_PEDIDO_PENDIENTE)).data;
                                     const mensajePedidosPendientes: string[] = pedidosPendientes.map((ped,i)=>{
-                                        return `${(i+1)}. Pedido #${ped.codPedido}`
+                                        return `${(i+1)}. Pedido #${ped.codPedido}\n${ped.direccion ? ped.direccion : 'Sin programar'}\n`
                                     });
                                     await this.enviarMensajeUsuario(
                                         [
@@ -108,6 +110,33 @@ export class BotCore {
                         } else{
                             await this.enviarMensajeUsuario(
                                 `Debes enviar una opción correcta.`
+                                ,client,ESTADO,ID_CONVERSACION_CABECERA,TELEFONO);
+                        }
+                        break;
+                    case ESTADO_4:
+                        if(MENSAJE.match(/^\d+$/)){
+                            const pedidosPendientes: Pedido[] = (await pedidoService.listarPedidosFiltro(ID_CLIENTE, ESTADO_PEDIDO_PENDIENTE)).data;
+                            const pedidoSeleccionado = pedidosPendientes[parseInt(MENSAJE)-1];
+                            await conversacionCabeceraService.actualizarConversacionCabecera(ID_CONVERSACION_CABECERA, {codPedido: pedidoSeleccionado.codPedido});
+                            await this.enviarMensajeUsuario(
+                                'Compartenos tu ubicación para programar la entrega de tu pedido 🚚🗺️'
+                                ,client,ESTADO_5,ID_CONVERSACION_CABECERA,TELEFONO);
+                        }else{
+                            await this.enviarMensajeUsuario(
+                                `Debes enviar un número de la lista.`
+                                ,client,ESTADO,ID_CONVERSACION_CABECERA,TELEFONO);
+                        }
+                        break;
+                    case ESTADO_5:
+                        if(message.type === 'location'){
+                            const { latitude, longitude } = message.location;
+                            const { direccion } = (await pedidoService.actualizarPedidoByCodPedido(conversacionCabecera.codPedido, {latitud: latitude, longitud: longitude})).data;
+                            await this.enviarMensajeUsuario(`Gracias por compartir tu ubicación 🗺️, tu pedido será entregado en ${direccion}.`,
+                                client,ESTADO_1,ID_CONVERSACION_CABECERA,TELEFONO);
+                            await conversacionCabeceraService.actualizarConversacionCabecera(ID_CONVERSACION_CABECERA, {estadoFlujo: 'T'});
+                        }else{
+                            await this.enviarMensajeUsuario(
+                                `Debes enviar tu ubicación desde tu teléfono 🗺️.`
                                 ,client,ESTADO,ID_CONVERSACION_CABECERA,TELEFONO);
                         }
                         break;
