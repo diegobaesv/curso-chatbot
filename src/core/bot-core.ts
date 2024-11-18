@@ -82,6 +82,10 @@ export class BotCore {
                                         ...mensajePedidosCurso,
                                         ].join('\n')
                                         ,client,ESTADO_6,ID_CONVERSACION_CABECERA,TELEFONO);
+                                    await this.enviarMensajeUsuario(
+                                        'Puedes volver a escribirnos para otra consulta. 😉🤲',
+                                        client,ESTADO_1,ID_CONVERSACION_CABECERA,TELEFONO);
+                                    await conversacionCabeceraService.actualizarConversacionCabecera(ID_CONVERSACION_CABECERA, {estadoFlujo: 'T'});
                                     break;
                                 case '3':
                                     const pedidosEntregados: Pedido[] = (await pedidoService.listarPedidosFiltro(ID_CLIENTE, ESTADO_PEDIDO_ENTREGADO)).data;
@@ -137,6 +141,20 @@ export class BotCore {
                         }else{
                             await this.enviarMensajeUsuario(
                                 `Debes enviar tu ubicación desde tu teléfono 🗺️.`
+                                ,client,ESTADO,ID_CONVERSACION_CABECERA,TELEFONO);
+                        }
+                        break;
+                    case ESTADO_7:
+                        if(MENSAJE.match(/^\d+$/)){
+                            const pedidosEntregados: Pedido[] = (await pedidoService.listarPedidosFiltro(ID_CLIENTE, ESTADO_PEDIDO_ENTREGADO)).data;
+                            const pedidoSeleccionado = pedidosEntregados[parseInt(MENSAJE)-1];
+                            await conversacionCabeceraService.actualizarConversacionCabecera(ID_CONVERSACION_CABECERA, {codPedido: pedidoSeleccionado.codPedido});
+                            await this.enviarMensajeUsuario(
+                                'Compartenos tu ubicación para programar la entrega de tu pedido 🚚🗺️'
+                                ,client,ESTADO_5,ID_CONVERSACION_CABECERA,TELEFONO);
+                        }else{
+                            await this.enviarMensajeUsuario(
+                                `Debes enviar un número de la lista.`
                                 ,client,ESTADO,ID_CONVERSACION_CABECERA,TELEFONO);
                         }
                         break;
