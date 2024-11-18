@@ -1,10 +1,11 @@
-import { Client, Message, MessageTypes } from "whatsapp-web.js";
+import { Client, Message, MessageMedia, MessageTypes } from "whatsapp-web.js";
 import * as conversacionService from "../services/conversacion.service";
 import * as conversacionCabeceraService from "../services/conversacion-cabecera.service";
 import * as clienteService from "../services/cliente.service";
 import * as pedidoService from "../services/pedido.service";
+import * as documentoService from "../services/documento.service";
 import { extractPhoneNumber, isContactMessage } from "../shared/util";
-import { ESTADO_1, ESTADO_2, ESTADO_3, ESTADO_4, ESTADO_5, ESTADO_6, ESTADO_7, ESTADO_9, ESTADO_PEDIDO_CURSO, ESTADO_PEDIDO_ENTREGADO, ESTADO_PEDIDO_PENDIENTE } from "../shared/constant";
+import { ESTADO_1, ESTADO_2, ESTADO_3, ESTADO_4, ESTADO_5, ESTADO_6, ESTADO_7, ESTADO_8, ESTADO_9, ESTADO_PEDIDO_CURSO, ESTADO_PEDIDO_ENTREGADO, ESTADO_PEDIDO_PENDIENTE } from "../shared/constant";
 import { ConversacionCabecera } from "../models/conversacion-cabecera";
 import { Cliente } from "../models/cliente";
 import { Pedido } from "../models/pedido";
@@ -149,14 +150,42 @@ export class BotCore {
                             const pedidosEntregados: Pedido[] = (await pedidoService.listarPedidosFiltro(ID_CLIENTE, ESTADO_PEDIDO_ENTREGADO)).data;
                             const pedidoSeleccionado = pedidosEntregados[parseInt(MENSAJE)-1];
                             await conversacionCabeceraService.actualizarConversacionCabecera(ID_CONVERSACION_CABECERA, {codPedido: pedidoSeleccionado.codPedido});
+                            const documentos = (await documentoService.listarDocumentosPorCodPedido(pedidoSeleccionado.codPedido)).data;
+                            const mensajeDocumentos: string[] = documentos.map((doc,i)=>{
+                                return `${(i+1)}. Descargar ${doc.nombre}`
+                            });
                             await this.enviarMensajeUsuario(
-                                'Compartenos tu ubicación para programar la entrega de tu pedido 🚚🗺️'
-                                ,client,ESTADO_5,ID_CONVERSACION_CABECERA,TELEFONO);
+                                [
+                                'Estos son tus documentos por descargar ⬇️:',
+                                ...mensajeDocumentos,
+                                ].join('\n')
+                                ,client,ESTADO_8,ID_CONVERSACION_CABECERA,TELEFONO);
                         }else{
                             await this.enviarMensajeUsuario(
                                 `Debes enviar un número de la lista.`
                                 ,client,ESTADO,ID_CONVERSACION_CABECERA,TELEFONO);
                         }
+                        break;
+                    case ESTADO_8:
+                        if(MENSAJE.match(/^\d+$/)){
+                            const documentos = (await documentoService.listarDocumentosPorCodPedido(conversacionCabecera.codPedido)).data;
+                            const documentoSeleccionado = documentos[parseInt(MENSAJE)-1];
+                            await this.enviarMensajeUsuario(
+                                `Descargando ${documentoSeleccionado.nombre} 📄📥, espera unos segundos.`
+                                ,client,ESTADO_1,ID_CONVERSACION_CABECERA,TELEFONO);
+                            // ENVIAR ARCHIVO DESDE URL
+                            
+                            
+                            await this.enviarMensajeUsuario(
+                                    'Puedes volver a escribirnos para otra consulta. 😉🤲',
+                                    client,ESTADO_1,ID_CONVERSACION_CABECERA,TELEFONO);
+                            await conversacionCabeceraService.actualizarConversacionCabecera(ID_CONVERSACION_CABECERA, {estadoFlujo: 'T'});
+                        }else{
+                            await this.enviarMensajeUsuario(
+                                `Debes enviar un número de la lista.`
+                                ,client,ESTADO,ID_CONVERSACION_CABECERA,TELEFONO);
+                        }
+
                         break;
                     case ESTADO_9:
                         const cliente: Cliente = (await clienteService.obtenerClientePorNumeroDocumento(MENSAJE)).data;
@@ -205,5 +234,10 @@ export class BotCore {
             telefono: telefono
         });
     }
+
+    private static async enviarArchivoUsuario(url:string, client: Client, idEstado: number, idConversacionCabecera: number,  telefono: string){
+        await client.sendMessage(`${telefono}@c.us`, await MessageMedia.fromUrl(url));
+    }
+
     
 }
