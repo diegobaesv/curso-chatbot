@@ -172,10 +172,8 @@ export class BotCore {
                             const documentoSeleccionado = documentos[parseInt(MENSAJE)-1];
                             await this.enviarMensajeUsuario(
                                 `Descargando ${documentoSeleccionado.nombre} 📄📥, espera unos segundos.`
-                                ,client,ESTADO_1,ID_CONVERSACION_CABECERA,TELEFONO);
-                            // ENVIAR ARCHIVO DESDE URL
-                            
-                            
+                                ,client,ESTADO,ID_CONVERSACION_CABECERA,TELEFONO);
+                            await this.enviarArchivoUsuario(documentoSeleccionado.rutaUrl, client, ESTADO, ID_CONVERSACION_CABECERA, TELEFONO);
                             await this.enviarMensajeUsuario(
                                     'Puedes volver a escribirnos para otra consulta. 😉🤲',
                                     client,ESTADO_1,ID_CONVERSACION_CABECERA,TELEFONO);
